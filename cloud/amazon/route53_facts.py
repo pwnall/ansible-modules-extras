@@ -159,12 +159,6 @@ EXAMPLES = '''
   register: delegation_sets
 
 '''
-try:
-    import boto
-    import botocore
-    HAS_BOTO = True
-except ImportError:
-    HAS_BOTO = False
 
 try:
     import boto3
@@ -407,14 +401,11 @@ def main():
     )
 
     # Validate Requirements
-    if not (HAS_BOTO or HAS_BOTO3):
-        module.fail_json(msg='json and boto/boto3 is required.')
+    if not HAS_BOTO3:
+        module.fail_json(msg='boto3 is required.')
 
-    try:
-        region, ec2_url, aws_connect_kwargs = get_aws_connection_info(module, boto3=True)
-        route53 = boto3_conn(module, conn_type='client', resource='route53', region=region, endpoint=ec2_url, **aws_connect_kwargs)
-    except boto.exception.NoAuthHandlerFound, e:
-        module.fail_json(msg="Can't authorize connection - "+str(e))
+    region, ec2_url, aws_connect_kwargs = get_aws_connection_info(module, boto3=True)
+    route53 = boto3_conn(module, conn_type='client', resource='route53', region=region, endpoint=ec2_url, **aws_connect_kwargs)
 
     invocations = {
         'change': change_details,
